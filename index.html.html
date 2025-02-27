@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion-style Quote Display</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f7f6f3;
+    }
+    
+    .quote-container {
+      width: 90%;
+      max-width: 500px;
+      padding: 30px 25px;
+      background-color: #7f7769;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .quote-mark {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #2e2925;
+    }
+    
+    .quote-text {
+      font-size: 18px;
+      line-height: 1.5;
+      color: #2e2925;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+      font-weight: 500;
+    }
+    
+    .quote-author {
+      font-size: 16px;
+      color: #2e2925;
+    }
+  </style>
+</head>
+<body>
+  <div class="quote-container">
+    <div class="quote-mark">❝</div>
+    <div id="quoteDisplay" class="quote-text">Once we accept our limits, we go beyond them.</div>
+    <div id="authorDisplay" class="quote-author">Albert Einstein</div>
+  </div>
+
+  <script>
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    const authorDisplay = document.getElementById('authorDisplay');
+    
+    // Collection of inspirational quotes
+    const quotes = [
+      { 
+        text: "Once we accept our limits, we go beyond them.",
+        author: "Albert Einstein"
+      },
+      {
+        text: "The only way to do great work is to love what you do.",
+        author: "Steve Jobs"
+      },
+      {
+        text: "Life is what happens when you're busy making other plans.",
+        author: "John Lennon"
+      },
+      {
+        text: "The future belongs to those who believe in the beauty of their dreams.",
+        author: "Eleanor Roosevelt"
+      },
+      {
+        text: "In the middle of difficulty lies opportunity.",
+        author: "Albert Einstein"
+      },
+      {
+        text: "It does not matter how slowly you go as long as you do not stop.",
+        author: "Confucius"
+      },
+      {
+        text: "The best way to predict the future is to create it.",
+        author: "Peter Drucker"
+      },
+      {
+        text: "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+        author: "Winston Churchill"
+      },
+      {
+        text: "Believe you can and you're halfway there.",
+        author: "Theodore Roosevelt"
+      },
+      {
+        text: "The only limit to our realization of tomorrow will be our doubts of today.",
+        author: "Franklin D. Roosevelt"
+      },
+      {
+        text: "You miss 100% of the shots you don't take.",
+        author: "Wayne Gretzky"
+      },
+      {
+        text: "The mind is everything. What you think you become.",
+        author: "Buddha"
+      },
+      {
+        text: "The journey of a thousand miles begins with one step.",
+        author: "Lao Tzu"
+      },
+      {
+        text: "Whether you think you can or you think you can't, you're right.",
+        author: "Henry Ford"
+      },
+      {
+        text: "Strive not to be a success, but rather to be of value.",
+        author: "Albert Einstein"
+      }
+    ];
+    
+    // Function to get a random quote
+    function getRandomQuote() {
+      // Try to get the last quote to avoid repetition
+      let lastQuote = null;
+      try {
+        lastQuote = JSON.parse(localStorage.getItem('lastQuote'));
+      } catch (e) {
+        // Ignore parsing errors
+      }
+      
+      // Keep generating a random quote until it's different from the last one
+      let randomQuote;
+      do {
+        const randomIndex = Math.floor(Math.random() * quotes.length);
+        randomQuote = quotes[randomIndex];
+      } while (lastQuote && randomQuote.text === lastQuote.text);
+      
+      // Save this quote as the last one shown
+      localStorage.setItem('lastQuote', JSON.stringify(randomQuote));
+      
+      return randomQuote;
+    }
+    
+    // Function to display a random quote
+    function displayRandomQuote() {
+      const randomQuote = getRandomQuote();
+      quoteDisplay.textContent = randomQuote.text;
+      authorDisplay.textContent = randomQuote.author;
+    }
+    
+    // Load a random quote when the page loads
+    displayRandomQuote();
+    
+    // Add multiple event listeners to catch different page visibility scenarios
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        displayRandomQuote();
+      }
+    });
+    
+    // For browsers that support the Page Visibility API
+    if (typeof document.hidden !== 'undefined') {
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+          displayRandomQuote();
+        }
+      });
+    }
+    
+    // For older browsers using focus/blur
+    window.addEventListener('focus', displayRandomQuote);
+    
+    // For mobile browsers and tab switching
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        displayRandomQuote();
+      }
+    });
+  </script>
+</body>
+</html>
