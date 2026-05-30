@@ -5,38 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notion-style Quote Display</title>
   <style>
-    html, body {
+    * {
       margin: 0;
       padding: 0;
-      height: 100%;
-      background-color: transparent;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background: transparent;
       overflow: hidden;
     }
-    
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
-    
+
     .quote-container {
-      width: 400px;
-      max-width: 90%;
+      width: 100%;
       padding: 30px 25px;
       background-color: #7f7769;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       box-sizing: border-box;
     }
-    
+
     .quote-mark {
       font-size: 28px;
       margin-bottom: 10px;
       color: #2e2925;
       font-weight: 500;
     }
-    
+
     .quote-text {
       font-size: 18px;
       line-height: 1.5;
@@ -44,117 +43,87 @@
       margin-bottom: 16px;
       white-space: pre-wrap;
       font-weight: 500;
+      min-height: 27px;
     }
-    
+
     .quote-author {
       font-size: 16px;
       color: #2e2925;
       font-weight: 500;
+      min-height: 20px;
+    }
+
+    .loading {
+      opacity: 0.5;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
   <div class="quote-container">
     <div class="quote-mark">❝</div>
-    <div id="quoteDisplay" class="quote-text">Once we accept our limits, we go beyond them.</div>
-    <div id="authorDisplay" class="quote-author">Albert Einstein</div>
+    <div id="quoteDisplay" class="quote-text loading">Loading quote...</div>
+    <div id="authorDisplay" class="quote-author"></div>
   </div>
 
   <script>
     const quoteDisplay = document.getElementById('quoteDisplay');
     const authorDisplay = document.getElementById('authorDisplay');
-    
-    // Collection of inspirational quotes
-    const quotes = [
-      { 
-        text: "Once we accept our limits, we go beyond them.",
-        author: "Albert Einstein"
-      },
-      {
-        text: "The only way to do great work is to love what you do.",
-        author: "Steve Jobs"
-      },
-      {
-        text: "Life is what happens when you're busy making other plans.",
-        author: "John Lennon"
-      },
-      {
-        text: "The future belongs to those who believe in the beauty of their dreams.",
-        author: "Eleanor Roosevelt"
-      },
-      {
-        text: "In the middle of difficulty lies opportunity.",
-        author: "Albert Einstein"
-      },
-      {
-        text: "It does not matter how slowly you go as long as you do not stop.",
-        author: "Confucius"
-      },
-      {
-        text: "The best way to predict the future is to create it.",
-        author: "Peter Drucker"
-      },
-      {
-        text: "Success is not final, failure is not fatal: It is the courage to continue that counts.",
-        author: "Winston Churchill"
-      },
-      {
-        text: "Believe you can and you're halfway there.",
-        author: "Theodore Roosevelt"
-      },
-      {
-        text: "The only limit to our realization of tomorrow will be our doubts of today.",
-        author: "Franklin D. Roosevelt"
-      },
-      {
-        text: "You miss 100% of the shots you don't take.",
-        author: "Wayne Gretzky"
-      },
-      {
-        text: "The mind is everything. What you think you become.",
-        author: "Buddha"
-      },
-      {
-        text: "The journey of a thousand miles begins with one step.",
-        author: "Lao Tzu"
-      },
-      {
-        text: "Whether you think you can or you think you can't, you're right.",
-        author: "Henry Ford"
-      },
-      {
-        text: "Strive not to be a success, but rather to be of value.",
-        author: "Albert Einstein"
-      }
-    ];
-    
-    // Function to get a random quote without localStorage
-    function getRandomQuote() {
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      return quotes[randomIndex];
+
+    // Use today's date as a seed so the quote stays the same all day
+    function getTodaySeed() {
+      const now = new Date();
+      return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
     }
-    
-    // Function to display a random quote
-    function displayRandomQuote() {
-      const randomQuote = getRandomQuote();
-      quoteDisplay.textContent = randomQuote.text;
-      authorDisplay.textContent = randomQuote.author;
-    }
-    
-    // Load a random quote when the page loads
-    displayRandomQuote();
-    
-    // Add visibility change detection (works in most browsers)
-    document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible') {
-        displayRandomQuote();
+
+    // Simple seeded random to get consistent quote per day
+    function seededRandom(seed) {
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+        hash |= 0;
       }
+      return Math.abs(hash);
+    }
+
+    async function fetchDailyQuote() {
+      const seed = getTodaySeed();
+      const pageNum = (seededRandom(seed) % 100) + 1; // page 1–100
+
+      try {
+        // quotable.io: free, no API key, huge database
+        const res = await fetch(`https://api.quotable.io/quotes/random?limit=1`);
+        if (!res.ok) throw new Error('quotable failed');
+        const data = await res.json();
+        const q = data[0];
+        showQuote(q.content, q.author);
+      } catch (e) {
+        // Fallback: zenquotes (also free, no key)
+        try {
+          const res = await fetch('https://zenquotes.io/api/random');
+          if (!res.ok) throw new Error('zenquotes failed');
+          const data = await res.json();
+          showQuote(data[0].q, data[0].a);
+        } catch (e2) {
+          // Last resort fallback
+          showQuote("The secret of getting ahead is getting started.", "Mark Twain");
+        }
+      }
+    }
+
+    function showQuote(text, author) {
+      quoteDisplay.classList.remove('loading');
+      quoteDisplay.textContent = text;
+      authorDisplay.textContent = author;
+    }
+
+    fetchDailyQuote();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') fetchDailyQuote();
     });
-    
-    // For mobile browsers and tab switching
-    window.addEventListener('pageshow', function(event) {
-      displayRandomQuote();
-    });
+
+    window.addEventListener('pageshow', fetchDailyQuote);
   </script>
 </body>
 </html>
