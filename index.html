@@ -12,9 +12,10 @@
     }
 
     html, body {
+      width: 100%;
+      height: 100%;
       background: #191919;
       overflow: hidden;
-      width: 100%;
     }
 
     body {
@@ -23,35 +24,36 @@
 
     .quote-container {
       width: 100%;
-      padding: 30px 25px;
+      height: 100%;
+      padding: 4vw 5vw;
       background-color: #7f7769;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .quote-mark {
-      font-size: 28px;
-      margin-bottom: 10px;
+      font-size: clamp(20px, 4vw, 36px);
+      margin-bottom: 0.5em;
       color: #2e2925;
       font-weight: 500;
+      line-height: 1;
     }
 
     .quote-text {
-      font-size: 18px;
+      font-size: clamp(14px, 2.5vw, 24px);
       line-height: 1.5;
       color: #2e2925;
-      margin-bottom: 16px;
-      white-space: pre-wrap;
+      margin-bottom: 0.8em;
       font-weight: 500;
-      min-height: 27px;
     }
 
     .quote-author {
-      font-size: 16px;
+      font-size: clamp(12px, 2vw, 20px);
       color: #2e2925;
       font-weight: 500;
-      min-height: 20px;
     }
 
     .loading {
@@ -73,11 +75,10 @@
 
     async function fetchDailyQuote() {
       try {
-        const res = await fetch(`https://api.quotable.io/quotes/random?limit=1`);
+        const res = await fetch('https://api.quotable.io/quotes/random?limit=1');
         if (!res.ok) throw new Error('quotable failed');
         const data = await res.json();
-        const q = data[0];
-        showQuote(q.content, q.author);
+        showQuote(data[0].content, data[0].author);
       } catch (e) {
         try {
           const res = await fetch('https://zenquotes.io/api/random');
