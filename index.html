@@ -5,12 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notion-style Quote Display</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     html, body {
       margin: 0;
       padding: 0;
@@ -30,34 +24,32 @@
       width: 400px;
       max-width: 90%;
       padding: 30px 25px;
-      background-color: #191919;
+      background-color: #7f7769;
       border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       box-sizing: border-box;
-      flex-shrink: 0;
     }
     
     .quote-mark {
       font-size: 28px;
-      margin-bottom: 8px;
-      color: #f0f0f0;
+      margin-bottom: 10px;
+      color: #2e2925;
       font-weight: 500;
-      line-height: 1;
     }
     
     .quote-text {
       font-size: 18px;
       line-height: 1.5;
-      color: #f0f0f0;
-      margin-bottom: 12px;
+      color: #2e2925;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
       font-weight: 500;
     }
     
     .quote-author {
       font-size: 16px;
-      color: #f0f0f0;
+      color: #2e2925;
       font-weight: 500;
-      line-height: 1;
     }
   </style>
 </head>
@@ -72,6 +64,7 @@
     const quoteDisplay = document.getElementById('quoteDisplay');
     const authorDisplay = document.getElementById('authorDisplay');
     
+    // Collection of inspirational quotes
     const quotes = [
       { 
         text: "Once we accept our limits, we go beyond them.",
@@ -135,25 +128,30 @@
       }
     ];
     
+    // Function to get a random quote without localStorage
     function getRandomQuote() {
       const randomIndex = Math.floor(Math.random() * quotes.length);
       return quotes[randomIndex];
     }
     
+    // Function to display a random quote
     function displayRandomQuote() {
       const randomQuote = getRandomQuote();
       quoteDisplay.textContent = randomQuote.text;
       authorDisplay.textContent = randomQuote.author;
     }
     
+    // Load a random quote when the page loads
     displayRandomQuote();
     
+    // Add visibility change detection (works in most browsers)
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'visible') {
         displayRandomQuote();
       }
     });
     
+    // For mobile browsers and tab switching
     window.addEventListener('pageshow', function(event) {
       displayRandomQuote();
     });
