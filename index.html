@@ -12,8 +12,9 @@
     }
 
     html, body {
-      background: transparent;
+      background: #191919;
       overflow: hidden;
+      width: 100%;
     }
 
     body {
@@ -70,42 +71,20 @@
     const quoteDisplay = document.getElementById('quoteDisplay');
     const authorDisplay = document.getElementById('authorDisplay');
 
-    // Use today's date as a seed so the quote stays the same all day
-    function getTodaySeed() {
-      const now = new Date();
-      return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-    }
-
-    // Simple seeded random to get consistent quote per day
-    function seededRandom(seed) {
-      let hash = 0;
-      for (let i = 0; i < seed.length; i++) {
-        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-        hash |= 0;
-      }
-      return Math.abs(hash);
-    }
-
     async function fetchDailyQuote() {
-      const seed = getTodaySeed();
-      const pageNum = (seededRandom(seed) % 100) + 1; // page 1–100
-
       try {
-        // quotable.io: free, no API key, huge database
         const res = await fetch(`https://api.quotable.io/quotes/random?limit=1`);
         if (!res.ok) throw new Error('quotable failed');
         const data = await res.json();
         const q = data[0];
         showQuote(q.content, q.author);
       } catch (e) {
-        // Fallback: zenquotes (also free, no key)
         try {
           const res = await fetch('https://zenquotes.io/api/random');
           if (!res.ok) throw new Error('zenquotes failed');
           const data = await res.json();
           showQuote(data[0].q, data[0].a);
         } catch (e2) {
-          // Last resort fallback
           showQuote("The secret of getting ahead is getting started.", "Mark Twain");
         }
       }
